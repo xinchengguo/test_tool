@@ -62,13 +62,23 @@ TX_THREAD my_thread1;
 
 TX_THREAD my_thread2;
 
+TX_TIMER led_timer;
+
+void led_timer_callback(ULONG param)
+{
+  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+}
 
 void my_thread1_entry(ULONG thread_input)
 {
   /* Enter into a forever loop. */
-  while(1)
+
+  UINT status;
+  status = tx_timer_create(&led_timer, "led_timer", led_timer_callback, 111, 100, 100, TX_AUTO_ACTIVATE);
+
+  while (1)
   {
-    printf("threadx 1 application running...\r\n");
+ //   printf("threadx 1 application running...\r\n");
     /* Sleep for 1 tick. */
     tx_thread_sleep(1000);
   }
@@ -76,9 +86,9 @@ void my_thread1_entry(ULONG thread_input)
 void my_thread2_entry(ULONG thread_input)
 {
   /* Enter into a forever loop. */
-  while(1)
+  while (1)
   {
-    printf("threadx 2 application running...\r\n");
+//    printf("threadx 2 application running...\r\n");
     /* Sleep for 1 tick. */
     tx_thread_sleep(1000);
   }
@@ -88,10 +98,10 @@ void tx_application_define(void *first_unused_memory)
 {
   /* Create my_thread! */
   tx_thread_create(&my_thread1, "My Thread 1",
-  my_thread1_entry, 0x1234, first_unused_memory, 1024, 3, 3, TX_NO_TIME_SLICE, TX_AUTO_START);
-  
+                   my_thread1_entry, 0x1234, first_unused_memory, 1024, 3, 3, TX_NO_TIME_SLICE, TX_AUTO_START);
+
   tx_thread_create(&my_thread2, "My Thread 2",
-  my_thread2_entry, 0x1234, first_unused_memory+1024, 1024, 1, 1, TX_NO_TIME_SLICE, TX_AUTO_START);
+                   my_thread2_entry, 0x1234, first_unused_memory + 1024, 1024, 1, 1, TX_NO_TIME_SLICE, TX_AUTO_START);
 }
 /* USER CODE END 0 */
 
@@ -127,7 +137,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-tx_kernel_enter( );
+  tx_kernel_enter();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -163,8 +173,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -198,7 +207,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
@@ -207,7 +216,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
